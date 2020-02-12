@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 
 
 class ProgressValueError(Exception):
@@ -6,7 +6,42 @@ class ProgressValueError(Exception):
 
 
 @dataclass
-class ProgressBar:
+class _ProgressBarData:
+    """Work around dataclasses and properties not being in good speaking terms.
+
+    This makes `dataclass` read the properties and generate the proper method
+    without thinking the default value should be the `property` instance.
+    """
+    size: int
+    total: int
+    progress: int = 0
+    characters: str = " ⠁⠃⠇⡇⣇⣧⣷⣿"
+
+    _steps: int = field(init=False, repr=False)
+    _resolution: int = field(init=False, repr=False)
+    _progress: int = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self._steps, self._resolution = self._steps_and_resolution()
+
+
+class _ProgressBarValidation(_ProgressBarData):
+    """Separate validators from main class logic."""
+    @property
+    def progress(self):
+        return self._progress
+
+    @progress.setter
+    def progress(self, value):
+        if value > self.total:
+            raise ProgressValueError(
+                f'Progress cannot be set higher than {self.total}. Value was {value}.'
+            )
+
+        self._progress = value
+
+
+class ProgressBar(_ProgressBarValidation):
     """A text-based progress bar.
 
     The progress bar is composed by three parts, as seen below in between '|':
@@ -27,26 +62,12 @@ class ProgressBar:
     Args:
         size: The progress bar size in characters.
         total: The total progress capacity of the bar in arbitrary units.
+        progress: The starting progress of the progress bar.
         characters: The characters to use for the bar. The first one is the
                     empty one, the last one is the solid one. Everything in
                     between represents the progression of the leading character,
                     from left to right.
-        progress: The starting progress of the progress bar.
     """
-    size: int
-    total: int
-    characters: str = " ⠁⠃⠇⡇⣇⣧⣷⣿"
-    progress: int = 0
-
-    _steps: int = field(init=False)
-    _resolution: int = field(init=False)
-    # Workaround to have a property. See:
-    # https://florimond.dev/blog/articles/2018/10/reconciling-dataclasses-and-properties-in-python/
-    _progress: int = field(default=0, init=False, repr=False)
-
-    def __post_init__(self):
-        self._steps, self._resolution = self._steps_and_resolution()
-
     def _steps_and_resolution(self):
         steps = len(self.characters) - 1
         resolution = self.size * (steps)
@@ -74,19 +95,6 @@ class ProgressBar:
         leading = self.characters[self._leading_char_index(filled)]
 
         return solid, leading
-
-    @property
-    def progress(self):
-        return self._progress
-
-    @progress.setter
-    def progress(self, value):
-        if value > self.total:
-            raise ProgressValueError(
-                f'Progress cannot be set higher than {self.total}. Value was {value}.'
-            )
-
-        self._progress = value
 
 
     def render(self) -> str:
