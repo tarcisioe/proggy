@@ -1,0 +1,12 @@
+[tool.poetry]
+name = "proggy"
+version = "0.1.0"
+description = "A progress bar generator."
+authors = ["Tarcísio Eduardo Moreira Crocomo <tarcisioe@pm.me>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
