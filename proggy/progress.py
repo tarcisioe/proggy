@@ -1,8 +1,7 @@
+"""Main logic behind progress bar rendering."""
 from dataclasses import dataclass, field, InitVar
 
-
-class ProgressValueError(Exception):
-    pass
+from .errors import ProgressValueError
 
 
 @dataclass
@@ -14,35 +13,55 @@ class _ProgressBarData:
     """
     size: int
     total: int
-    progress: int = 0
-    characters: str = " ⠁⠃⠇⡇⣇⣧⣷⣿"
+    characters: str = ' ⠁⠃⠇⡇⣇⣧⣷⣿'
+    starting_progress: InitVar[int] = 0
 
     _steps: int = field(init=False, repr=False)
     _resolution: int = field(init=False, repr=False)
     _progress: int = field(init=False, repr=False)
 
-    def __post_init__(self):
+    def _steps_and_resolution(self):
+        steps = len(self.characters) - 1
+        resolution = self.size * (steps)
+
+        return steps, resolution
+
+    def __post_init__(self, starting_progress):
         self._steps, self._resolution = self._steps_and_resolution()
+        self._progress = starting_progress
 
 
 class _ProgressBarValidation(_ProgressBarData):
     """Separate validators from main class logic."""
     @property
-    def progress(self):
+    def progress(self) -> int:
+        """Get the current progress of the progress bar.
+
+        Returns:
+            The current progress (out of self.total).
+        """
         return self._progress
 
     @progress.setter
     def progress(self, value):
-        if value > self.total:
+        """Set the current progress of the progress bar.
+
+        Raises an error if value is less than zero or over self.total.
+
+        Returns:
+            The current progress (out of self.total).
+        """
+        if self.total < value < 0:
             raise ProgressValueError(
-                f'Progress cannot be set higher than {self.total}. Value was {value}.'
+                f'Progress cannot be set higher than {self.total}. '
+                f'Value was {value}.'
             )
 
         self._progress = value
 
 
 class ProgressBar(_ProgressBarValidation):
-    """A text-based progress bar.
+    r"""A text-based progress bar.
 
     The progress bar is composed by three parts, as seen below in between '|':
 
@@ -56,8 +75,8 @@ class ProgressBar(_ProgressBarValidation):
     The leading character can progress through a sequence of symbols,
     artificially raising the progress bar resolution.
 
-    The empty part is composed of characters that represent progress that hasn't
-    yet been reached.
+    The empty part is composed of characters that represent progress that
+    hasn't yet been reached.
 
     Args:
         size: The progress bar size in characters.
@@ -65,15 +84,9 @@ class ProgressBar(_ProgressBarValidation):
         progress: The starting progress of the progress bar.
         characters: The characters to use for the bar. The first one is the
                     empty one, the last one is the solid one. Everything in
-                    between represents the progression of the leading character,
-                    from left to right.
+                    between represents the progression of the leading
+                    character, from left to right.
     """
-    def _steps_and_resolution(self):
-        steps = len(self.characters) - 1
-        resolution = self.size * (steps)
-
-        return steps, resolution
-
     def _filled_amount(self):
         full_ratio = self.progress/self.total
 
@@ -95,7 +108,6 @@ class ProgressBar(_ProgressBarValidation):
         leading = self.characters[self._leading_char_index(filled)]
 
         return solid, leading
-
 
     def render(self) -> str:
         """Render the progress bar to a string.
