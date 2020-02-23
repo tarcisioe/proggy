@@ -27,17 +27,14 @@ Examples
 ```python
 import time
 
-from proggy import ProgressBar
+from proggy.tty import TTYProgressBar
 
 
-p = ProgressBar(size=30, total=100)
-
-p.render()
-
-for i in range(100):
-    time.sleep(0.1)
-    p.progress += 1
-    print(f'\u001b[{p.size}D{p.render()}', end='', flush=True)
+with TTYProgressBar(size=30, total=100) as p:
+    for i in range(100):
+        time.sleep(0.1)
+        p.progress += 1
+        p.draw()
 ```
 
 Output:

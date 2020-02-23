@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field, InitVar
 from typing import Optional
 
+from ..errors import BarNotStartedError
 from ..progress import ProgressBar
 
 from .position import Position
@@ -19,6 +20,16 @@ class TTYProgressBar(ProgressBar):
     """
     position: InitVar[Optional[Position]] = None
     _position: Position = field(init=False)
+    _started: bool = field(default=False, init=False)
+
+    def __enter__(self):
+        self._started = True
+        self.draw()
+        return self
+
+    def __exit__(self, exc_type, exc, exc_tb):
+        print()
+        self._started = False
 
     def __post_init__(self, starting_progress, position):
         super().__post_init__(starting_progress)
@@ -28,5 +39,10 @@ class TTYProgressBar(ProgressBar):
 
     def draw(self):
         """Draw the progress bar to the tty."""
+        if not self._started:
+            raise BarNotStartedError(
+                "This progress bar should only be used as a context manager."
+            )
+
         with at_position(self._position):
             print(self.render(), end='', flush=True)

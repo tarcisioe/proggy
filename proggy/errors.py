@@ -6,7 +6,11 @@ class ProggyError(Exception):
 
 
 class ProgressValueError(ProggyError):
-    """Represent a value error during the manipulation of a progress bar.
+    """Value error during the manipulation of a progress bar.
 
     E.g.: Progress being set higher than total.
     """
+
+
+class BarNotStartedError(ProggyError):
+    """Error when using a context-manager-only type outside a with statement."""
