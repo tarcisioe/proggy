@@ -75,13 +75,21 @@ def at_position(position: Position):
     set_cursor_position(old)
 
 
-def reserve_space(n_lines: int):
+def reserve_space(n_lines: int, starting_position: Optional[Position] = None):
     """Reserve n lines in the console and return the position of the first one.
 
     Leaves the cursor in the line after the reserved lines.
 
     Args:
         n_lines: How many lines to reserve.
+        starting_position: How many lines to reserve.
     """
-    print('\n' * (n_lines), end='', flush=True)
-    return get_cursor_position() - Position(n_lines, 0)
+    start = (
+        starting_position
+        if starting_position is not None
+        else get_cursor_position()
+    )
+
+    with at_position(start):
+        print('\n' * (n_lines), end='', flush=True)
+        return start - Position(n_lines, 0)
