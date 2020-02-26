@@ -1,66 +1,57 @@
 """Main logic behind progress bar rendering."""
-from dataclasses import dataclass, field, InitVar
+from dataclasses import dataclass, field
 
 from .errors import ProgressValueError
+from .util import checked_property
+
+
+def _positive(name, instance, value: int):
+    if value <= 0:
+        raise ProgressValueError(
+            f'Value for {name} must be positive. '
+            f'Attempted value was {value}.'
+        )
+
+
+def _non_negative(name, instance, value: int):
+    if value < 0:
+        raise ProgressValueError(
+            f'Value for {name} must be non-negative. '
+            f'Attempted value was {value}.'
+        )
+
+
+def _lower_than_total(_, instance, value: int):
+    if not 0 <= value <= instance.total:
+        raise ProgressValueError(
+            f'Value for progress must be between 0 and {instance.total}. '
+            f'Attempted value was {value}.'
+        )
+
+
+def _bigger_than_progress(_, instance, value: int):
+    try:
+        if value < instance.progress:
+            raise ProgressValueError(
+                f'Value for total cannot lower than current '
+                f'progress: {instance.progress}. '
+                f'Attempted value was {value}.'
+            )
+    except KeyError:
+        pass
+
+
+def _more_than_two_characters(_, instance, value: str):
+    if len(value) < 2:
+        raise ProgressValueError(
+            '"characters" must have at least two characters. '
+            'At least an empty and a full character must be provided. '
+            f'Attempted value: {repr(value)}.'
+        )
 
 
 @dataclass
-class _ProgressBarData:
-    """Work around dataclasses and properties not being in good speaking terms.
-
-    This makes `dataclass` read the properties and generate the proper method
-    without thinking the default value should be the `property` instance.
-    """
-    size: int
-    total: int
-    characters: str = ' ⠁⠃⠇⡇⣇⣧⣷⣿'
-    starting_progress: InitVar[int] = 0
-
-    _steps: int = field(init=False, repr=False)
-    _resolution: int = field(init=False, repr=False)
-    _progress: int = field(init=False, repr=False)
-
-    def _steps_and_resolution(self):
-        steps = len(self.characters) - 1
-        resolution = self.size * (steps)
-
-        return steps, resolution
-
-    def __post_init__(self, starting_progress):
-        self._steps, self._resolution = self._steps_and_resolution()
-        self._progress = starting_progress
-
-
-class _ProgressBarValidation(_ProgressBarData):
-    """Separate validators from main class logic."""
-    @property
-    def progress(self) -> int:
-        """Get the current progress of the progress bar.
-
-        Returns:
-            The current progress (out of self.total).
-        """
-        return self._progress
-
-    @progress.setter
-    def progress(self, value):
-        """Set the current progress of the progress bar.
-
-        Raises an error if value is less than zero or over self.total.
-
-        Returns:
-            The current progress (out of self.total).
-        """
-        if self.total < value < 0:
-            raise ProgressValueError(
-                f'Progress cannot be set higher than {self.total}. '
-                f'Value was {value}.'
-            )
-
-        self._progress = value
-
-
-class ProgressBar(_ProgressBarValidation):
+class LogicalProgressBar:
     r"""A text-based progress bar.
 
     The progress bar is composed by three parts, as seen below in between '|':
@@ -87,6 +78,31 @@ class ProgressBar(_ProgressBarValidation):
                     between represents the progression of the leading
                     character, from left to right.
     """
+    size: int = checked_property(validators=(_non_negative,))
+    total: int = checked_property(
+        validators=(_non_negative, _bigger_than_progress),
+    )
+    progress: int = checked_property(
+        default=0,
+        validators=(_lower_than_total,)
+    )
+    characters: str = checked_property(
+        default=' ⠁⠃⠇⡇⣇⣧⣷⣿',
+        validators=(_more_than_two_characters,)
+    )
+
+    _steps: int = field(init=False, repr=False)
+    _resolution: int = field(init=False, repr=False)
+
+    def _steps_and_resolution(self):
+        steps = len(self.characters) - 1
+        resolution = self.size * (steps)
+
+        return steps, resolution
+
+    def __post_init__(self):
+        self._steps, self._resolution = self._steps_and_resolution()
+
     def _filled_amount(self):
         full_ratio = self.progress/self.total
 
@@ -121,3 +137,6 @@ class ProgressBar(_ProgressBarValidation):
         bar = f'{full:{empty}<{self.size}}'
 
         return bar
+
+
+__all__ = ['LogicalProgressBar']

@@ -1,2 +1,2 @@
 """Proggy main package."""
-from .progress import ProgressBar
+from .progress import *
