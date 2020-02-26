@@ -18,12 +18,14 @@ class TTYProgressBar(LogicalProgressBar):
         position: The position where the progress bar should be rendered.
                   If ommitted, uses the current cursor position.
     """
-    position: Position = field(default_factory=get_cursor_position)
+    position: Optional[Position] = None
 
     _started: bool = field(default=False, init=False)
 
     def __enter__(self):
         self._started = True
+        if self.position is None:
+            self.position = get_cursor_position()
         self.draw()
         return self
 
@@ -50,7 +52,7 @@ class TTYMultiProgressBar:
         position: The position where the progress bar should be rendered.
                   If ommitted, uses the current cursor position.
     """
-    position: Position = field(default_factory=get_cursor_position)
+    position: Optional[Position] = None
     bars: InitVar[Optional[List[LogicalProgressBar]]] = None
 
     _bars: List[Tuple[Position, LogicalProgressBar]] = field(
@@ -60,14 +62,20 @@ class TTYMultiProgressBar:
 
     def __enter__(self):
         self._started = True
+
+        if self.position is None:
+            self.position = get_cursor_position()
+
         self.position = reserve_space(
             len(self._bars),
             starting_position=self.position
         )
+
         self.draw()
         return self
 
     def __exit__(self, exc_type, exc, exc_tb):
+        print()
         self._started = False
 
     def __post_init__(self, bars):

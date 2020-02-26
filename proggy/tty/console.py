@@ -90,6 +90,6 @@ def reserve_space(n_lines: int, starting_position: Optional[Position] = None):
         else get_cursor_position()
     )
 
-    with at_position(start):
-        print('\n' * (n_lines), end='', flush=True)
-        return start - Position(n_lines, 0)
+    set_cursor_position(start)
+    print('\n' * (n_lines-1), end='', flush=True)
+    return get_cursor_position() - Position(n_lines-1, 0)
