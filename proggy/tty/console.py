@@ -75,14 +75,21 @@ def at_position(position: Position):
     set_cursor_position(old)
 
 
-def reserve_space(n_lines: int, starting_position: Optional[Position] = None):
+def reserve_space(
+    n_lines: int,
+    starting_position: Optional[Position] = None,
+) -> Position:
     """Reserve n lines in the console and return the position of the first one.
 
-    Leaves the cursor in the line after the reserved lines.
+    Leaves the cursor in the last reserve line.
 
     Args:
         n_lines: How many lines to reserve.
         starting_position: How many lines to reserve.
+
+    Returns:
+        The new starting position (which may have changed if scrolling
+        occurred).
     """
     start = (
         starting_position
