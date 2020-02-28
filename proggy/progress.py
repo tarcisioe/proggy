@@ -1,7 +1,7 @@
 """Main logic behind progress bar rendering."""
 from dataclasses import dataclass, field
 
-from .errors import ProgressValueError
+from .error import ProgressValueError
 from .util import checked_property
 
 

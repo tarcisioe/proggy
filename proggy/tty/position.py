@@ -21,3 +21,6 @@ class Position:
 
     def __sub__(self, other: Position) -> Position:
         return self + (other * -1)
+
+
+__all__ = ['Position']

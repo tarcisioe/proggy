@@ -10,7 +10,3 @@ class ProgressValueError(ProggyError):
 
     E.g.: Progress being set higher than total.
     """
-
-
-class BarNotStartedError(ProggyError):
-    """Error when using a context-manager-only type outside a with statement."""

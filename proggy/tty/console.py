@@ -100,3 +100,10 @@ def reserve_space(
     set_cursor_position(start)
     print('\n' * (n_lines-1), end='', flush=True)
     return get_cursor_position() - Position(n_lines-1, 0)
+
+
+__all__ = [
+    'at_position',
+    'get_cursor_position',
+    'reserve_space',
+]
