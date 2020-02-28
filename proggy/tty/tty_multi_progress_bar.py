@@ -1,8 +1,10 @@
-"""TTY-rendering enabled progress bar."""
+"""TTY-rendering enabled multi progress bar."""
+from __future__ import annotations
 from dataclasses import dataclass, field, InitVar
 from typing import List, Optional, Tuple
 
 from ..progress import LogicalProgressBar
+from ..util import wrapper
 
 from .position import Position
 from .tty_drawable import TTYDrawable
@@ -30,6 +32,22 @@ class _TTYMultiProgressBarData:
             )
 
 
+@dataclass
+class MultiProgressBarProxy:
+    """Proxy for a multi-progress single bar capable of drawing its parent."""
+    bar: LogicalProgressBar
+    parent: TTYMultiProgressBar
+
+    size: int = wrapper(lambda self: self.bar)
+    progress: int = wrapper(lambda self: self.bar)
+    total: int = wrapper(lambda self: self.bar)
+    characters: str = wrapper(lambda self: self.bar)
+
+    def draw(self):
+        """Draw the parent TTYMultiProgressBar."""
+        self.parent.draw()
+
+
 class TTYMultiProgressBar(  # pylint: disable=abstract-method
     _TTYMultiProgressBarData,
     TTYDrawable
@@ -50,5 +68,14 @@ class TTYMultiProgressBar(  # pylint: disable=abstract-method
             with at_position(self.position + delta):
                 print(bar.render(), end='', flush=True)
 
+    def bar_at(self, index: int) -> MultiProgressBarProxy:
+        """Get a proxy to the bar at a given index."""
+        _, bar = self._bars[index]
 
-__all__ = ['TTYMultiProgressBar']
+        return MultiProgressBarProxy(bar, self)
+
+
+__all__ = [
+    'MultiProgressBarProxy',
+    'TTYMultiProgressBar',
+]

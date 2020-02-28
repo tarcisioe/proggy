@@ -1,5 +1,9 @@
 """Utility types and functions."""
-from typing import Any
+from typing import Any, Callable, Sequence, TypeVar, Optional
+
+
+T = TypeVar('T')
+Validator = Callable[[Optional[str], Any, T], bool]
 
 
 class CheckedProperty:
@@ -9,9 +13,14 @@ class CheckedProperty:
     around that issue.
 
     Args:
-        validators: functions
+        validators: Predicates to run agains a value when set.
+        default: Default value for the property.
     """
-    def __init__(self, validators=(), default=None):
+    def __init__(
+        self,
+        validators: Sequence[Validator[T]] = (),
+        default: Optional[T] = None
+    ):
         self.validators = validators
         self.default = default
         self.name = None
@@ -19,7 +28,7 @@ class CheckedProperty:
     def __set_name__(self, owner, name):
         self.name = name
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner=None):
         if not instance:
             return self
         return instance.__dict__[self.name]
@@ -27,7 +36,7 @@ class CheckedProperty:
     def __delete__(self, instance):
         del instance.__dict__[self.name]
 
-    def __set__(self, instance, value):
+    def __set__(self, instance, value: T):
         if value is self:
             if self.default is not None:
                 value = self.default
@@ -46,3 +55,36 @@ class CheckedProperty:
 def checked_property(*args, **kwargs) -> Any:
     """Type-erased constructor for CheckedProperty."""
     return CheckedProperty(*args, **kwargs)
+
+
+class Wrapper:
+    """Helper to wrap a member's attributes.
+
+    Args:
+        wrapped_getter:
+    """
+    def __init__(self, wrapped_getter):
+        self.wrapped_getter = wrapped_getter
+        self.name = None
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, instance, owner=None):
+        if not instance:
+            return self
+        return getattr(self.wrapped_getter(instance), self.name)
+
+    def __delete__(self, instance):
+        delattr(self.wrapped_getter(instance), self.name)
+
+    def __set__(self, instance, value):
+        if value is self:
+            return
+
+        setattr(self.wrapped_getter(instance), self.name, value)
+
+
+def wrapper(*args, **kwargs) -> Any:
+    """Type-erased constructor for CheckedProperty."""
+    return Wrapper(*args, **kwargs)

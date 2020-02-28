@@ -9,3 +9,15 @@ class ProgressBar(Protocol):
     progress: int
     total: int
     characters: str
+
+
+@runtime_checkable
+class Drawable(Protocol):
+    """A Drawable object."""
+    def draw(self) -> None:
+        """Draw the progress bar."""
+
+
+@runtime_checkable
+class DrawableBar(ProgressBar, Drawable, Protocol):
+    """Protocol of a drawable bar."""
