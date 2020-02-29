@@ -1,9 +1,9 @@
 """TTY-rendering enabled progress bar."""
 from dataclasses import dataclass, InitVar, field
 from ..progress import LogicalProgressBar, BarInfo
-from ..util import wrapper
 
 from .console import at_position
+from .drawing_mixin import DrawingWrapperMixin
 from .tty_drawable import TTYDrawableMixin
 
 
@@ -15,6 +15,7 @@ class _TTYProgressBarData:
 @dataclass
 class TTYProgressBar(
     TTYDrawableMixin['TTYProgressBar'],
+    DrawingWrapperMixin,
     _TTYProgressBarData,
 ):
     """Progress bar capable of "drawing" itself to an ANSI-escape enabled TTY.
@@ -25,19 +26,6 @@ class TTYProgressBar(
     """
     bar: LogicalProgressBar = field(init=False)
     _height = 1
-
-    size: int = wrapper(lambda self: self.bar)
-    total: int = wrapper(lambda self: self.bar)
-    characters: str = wrapper(lambda self: self.bar)
-
-    @property
-    def progress(self) -> int:
-        return self.bar.progress
-
-    @progress.setter
-    def progress(self, value: int):
-        self.bar.progress = value
-        self.draw()
 
     def __post_init__(self, bar_info):
         self.bar = LogicalProgressBar(bar_info)

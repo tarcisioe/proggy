@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field, InitVar
 from typing import List, Optional, Tuple
 
-from ..progress import LogicalProgressBar
-from ..util import wrapper
+from ..progress import LogicalProgressBar, BarInfo
 
+from .drawing_mixin import DrawingWrapperMixin
 from .position import Position
 from .tty_drawable import TTYDrawableMixin
 
@@ -15,40 +15,33 @@ from .console import at_position
 @dataclass
 class _TTYMultiProgressBarData(TTYDrawableMixin['TTYMultiProgressBar']):
     """Mypy crashes if this is part of TTYMultiProgressBar yet."""
-    bars: InitVar[Optional[List[LogicalProgressBar]]] = None
+    bar_infos: InitVar[Optional[List[BarInfo]]] = None
 
     _bars: List[Tuple[Position, LogicalProgressBar]] = field(
         default_factory=lambda: [], init=False
     )
     _started: bool = field(default=False, init=False)
 
-    def __post_init__(self, bars):
-        bars = bars if bars is not None else []
+    def __post_init__(self, bar_infos) -> None:
+        bar_infos = bar_infos if bar_infos is not None else []
 
-        for delta, bar in enumerate(bars):
+        for delta, bar in enumerate(bar_infos):
             self._bars.append(
-                (Position(delta, 0), bar)
+                (Position(delta, 0), LogicalProgressBar(bar))
             )
 
 
 @dataclass
-class MultiProgressBarProxy:
-    """Proxy for a multi-progress single bar capable of drawing its parent."""
+class _MultiProgressBarProxyData:
     bar: LogicalProgressBar
     parent: TTYMultiProgressBar
 
-    size: int = wrapper(lambda self: self.bar)
-    total: int = wrapper(lambda self: self.bar)
-    characters: str = wrapper(lambda self: self.bar)
 
-    @property
-    def progress(self) -> int:
-        """Wrap inner bar progress by drawing when it is set."""
-        return self.bar.progress
-
-    @progress.setter
-    def progress(self, value: int):
-        self.bar.progress = value
+@dataclass
+class MultiProgressBarProxy(DrawingWrapperMixin, _MultiProgressBarProxyData):
+    """Proxy for a multi-progress single bar capable of drawing its parent."""
+    def draw(self):
+        """Draw the parent TTYMultiProgressBar."""
         self.parent.draw()
 
 
@@ -58,6 +51,7 @@ class TTYMultiProgressBar(
     """Progress bar capable of "drawing" itself to an ANSI-escape enabled TTY.
 
     Args:
+        bar_infos: Parameters for initializing the inner progress bars.
         position: The position where the progress bar should be rendered.
                   If ommitted, uses the current cursor position.
     """
@@ -75,7 +69,7 @@ class TTYMultiProgressBar(
         """Get a proxy to the bar at a given index."""
         _, bar = self._bars[index]
 
-        return MultiProgressBarProxy(bar, self)
+        return MultiProgressBarProxy(bar=bar, parent=self)
 
 
 __all__ = [
