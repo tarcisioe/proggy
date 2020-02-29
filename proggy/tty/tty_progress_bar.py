@@ -14,9 +14,7 @@ class _TTYProgressBarData:
 
 @dataclass
 class TTYProgressBar(
-    TTYDrawableMixin['TTYProgressBar'],
-    DrawingWrapperMixin,
-    _TTYProgressBarData,
+    TTYDrawableMixin['TTYProgressBar'], DrawingWrapperMixin, _TTYProgressBarData,
 ):
     """Progress bar capable of "drawing" itself to an ANSI-escape enabled TTY.
 
@@ -24,6 +22,7 @@ class TTYProgressBar(
         position: The position where the progress bar should be rendered.
                   If ommitted, uses the current cursor position.
     """
+
     bar: LogicalProgressBar = field(init=False)
     _height = 1
 

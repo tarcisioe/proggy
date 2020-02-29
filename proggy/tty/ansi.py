@@ -7,6 +7,7 @@ from .position import Position
 
 class ANSIEscapeType(Enum):
     """Suffixes which define ANSI escape sequence types."""
+
     CursorPosition = 'H'
     DeviceStatusReport = '6n'
 

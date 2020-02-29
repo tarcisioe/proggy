@@ -17,6 +17,7 @@ class TTYDrawableMixin(Generic[T]):
 
     Child classes should provide their own height and method of drawing.
     """
+
     position: Optional[Position] = None
     _started: bool = field(default=False, init=False)
     _height: int = field(init=False)
@@ -37,10 +38,7 @@ class TTYDrawableMixin(Generic[T]):
         if self.position is None:
             self.position = get_cursor_position()
 
-        self.position = reserve_space(
-            self._height,
-            starting_position=self.position
-        )
+        self.position = reserve_space(self._height, starting_position=self.position)
 
         self.draw()
         return cast(T, self)

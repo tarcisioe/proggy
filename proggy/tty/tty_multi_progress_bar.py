@@ -15,6 +15,7 @@ from .console import at_position
 @dataclass
 class _TTYMultiProgressBarData(TTYDrawableMixin['TTYMultiProgressBar']):
     """Mypy crashes if this is part of TTYMultiProgressBar yet."""
+
     bar_infos: InitVar[Optional[List[BarInfo]]] = None
 
     _bars: List[Tuple[Position, LogicalProgressBar]] = field(
@@ -26,9 +27,7 @@ class _TTYMultiProgressBarData(TTYDrawableMixin['TTYMultiProgressBar']):
         bar_infos = bar_infos if bar_infos is not None else []
 
         for delta, bar in enumerate(bar_infos):
-            self._bars.append(
-                (Position(delta, 0), LogicalProgressBar(bar))
-            )
+            self._bars.append((Position(delta, 0), LogicalProgressBar(bar)))
 
 
 @dataclass
@@ -40,14 +39,13 @@ class _MultiProgressBarProxyData:
 @dataclass
 class MultiProgressBarProxy(DrawingWrapperMixin, _MultiProgressBarProxyData):
     """Proxy for a multi-progress single bar capable of drawing its parent."""
+
     def draw(self):
         """Draw the parent TTYMultiProgressBar."""
         self.parent.draw()
 
 
-class TTYMultiProgressBar(
-    _TTYMultiProgressBarData,
-):
+class TTYMultiProgressBar(_TTYMultiProgressBarData):
     """Progress bar capable of "drawing" itself to an ANSI-escape enabled TTY.
 
     Args:
@@ -55,6 +53,7 @@ class TTYMultiProgressBar(
         position: The position where the progress bar should be rendered.
                   If ommitted, uses the current cursor position.
     """
+
     @property
     def _height(self):
         return len(self._bars)

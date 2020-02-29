@@ -16,10 +16,9 @@ class CheckedProperty:
         validators: Predicates to run agains a value when set.
         default: Default value for the property.
     """
+
     def __init__(
-        self,
-        validators: Sequence[Validator[T]] = (),
-        default: Optional[T] = None
+        self, validators: Sequence[Validator[T]] = (), default: Optional[T] = None
     ):
         self.validators = validators
         self.default = default
@@ -63,6 +62,7 @@ class Wrapper:
     Args:
         wrapped_getter:
     """
+
     def __init__(self, wrapped_getter):
         self.wrapped_getter = wrapped_getter
         self.name = None

@@ -10,6 +10,7 @@ class Position:
 
     By usual convention for the domain, uses (line, column) notation.
     """
+
     y: int
     x: int
 

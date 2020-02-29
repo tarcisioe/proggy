@@ -8,7 +8,9 @@ from typing import Optional
 
 from .position import Position
 from .ansi import (
-    read_ansi_response, device_status_report_escape, set_cursor_position_escape
+    read_ansi_response,
+    device_status_report_escape,
+    set_cursor_position_escape,
 )
 
 
@@ -76,8 +78,7 @@ def at_position(position: Position):
 
 
 def reserve_space(
-    n_lines: int,
-    starting_position: Optional[Position] = None,
+    n_lines: int, starting_position: Optional[Position] = None,
 ) -> Position:
     """Reserve n lines in the console and return the position of the first one.
 
@@ -92,14 +93,12 @@ def reserve_space(
         occurred).
     """
     start = (
-        starting_position
-        if starting_position is not None
-        else get_cursor_position()
+        starting_position if starting_position is not None else get_cursor_position()
     )
 
     set_cursor_position(start)
-    print('\n' * (n_lines-1), end='', flush=True)
-    return get_cursor_position() - Position(n_lines-1, 0)
+    print('\n' * (n_lines - 1), end='', flush=True)
+    return get_cursor_position() - Position(n_lines - 1, 0)
 
 
 __all__ = [

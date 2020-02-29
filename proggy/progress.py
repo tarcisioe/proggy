@@ -8,16 +8,14 @@ from .util import checked_property, wrapper
 def _positive(name, instance, value: int):
     if value <= 0:
         raise ProgressValueError(
-            f'Value for {name} must be positive. '
-            f'Attempted value was {value}.'
+            f'Value for {name} must be positive. Attempted value: {value}.'
         )
 
 
 def _non_negative(name, instance, value: int):
     if value < 0:
         raise ProgressValueError(
-            f'Value for {name} must be non-negative. '
-            f'Attempted value was {value}.'
+            f'Value for {name} must be non-negative. Attempted value: {value}.'
         )
 
 
@@ -53,17 +51,12 @@ def _more_than_two_characters(_, instance, value: str):
 @dataclass
 class BarInfo:
     """Internal progress bar data."""
+
     size: int = checked_property(validators=(_non_negative,))
-    total: int = checked_property(
-        validators=(_non_negative, _bigger_than_progress),
-    )
-    progress: int = checked_property(
-        default=0,
-        validators=(_lower_than_total,)
-    )
+    total: int = checked_property(validators=(_non_negative, _bigger_than_progress),)
+    progress: int = checked_property(default=0, validators=(_lower_than_total,))
     characters: str = checked_property(
-        default=' ⠁⠃⠇⡇⣇⣧⣷⣿',
-        validators=(_more_than_two_characters,)
+        default=' ⠁⠃⠇⡇⣇⣧⣷⣿', validators=(_more_than_two_characters,)
     )
 
 
@@ -114,7 +107,7 @@ class LogicalProgressBar:
         self._steps, self._resolution = self._steps_and_resolution()
 
     def _filled_amount(self):
-        full_ratio = self.progress/self.total
+        full_ratio = self.progress / self.total
 
         return int(self._resolution * full_ratio)
 

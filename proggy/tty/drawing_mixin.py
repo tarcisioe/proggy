@@ -9,6 +9,7 @@ from ..util import wrapper
 
 class DrawableWithBar(Protocol):
     """A class that has a ProgressBar and can draw itself."""
+
     bar: ProgressBar
 
     def draw(self):
@@ -19,6 +20,7 @@ class DrawableWithBar(Protocol):
 @dataclass
 class DrawingWrapperMixin:
     """Proxy for a multi-progress single bar capable of drawing its parent."""
+
     size: int = wrapper(lambda self: self.bar)
     total: int = wrapper(lambda self: self.bar)
     characters: str = wrapper(lambda self: self.bar)
