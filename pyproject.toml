@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "proggy"
-version = "0.3.0"
+version = "0.4.0"
 description = "A progress bar generator."
 authors = ["Tarcísio Eduardo Moreira Crocomo <tarcisioe@pm.me>"]
 license = "MIT"
