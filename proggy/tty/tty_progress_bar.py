@@ -8,8 +8,8 @@ from .tty_drawable import TTYDrawableMixin
 
 @dataclass
 class TTYProgressBar(
-    LogicalProgressBar,
     TTYDrawableMixin['TTYProgressBar'],
+    LogicalProgressBar,
 ):
     """Progress bar capable of "drawing" itself to an ANSI-escape enabled TTY.
 

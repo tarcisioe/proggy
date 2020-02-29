@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 
 from .error import ProgressValueError
-from .util import checked_property
+from .util import checked_property, wrapper
 
 
 def _positive(name, instance, value: int):
@@ -51,6 +51,23 @@ def _more_than_two_characters(_, instance, value: str):
 
 
 @dataclass
+class BarInfo:
+    """Internal progress bar data."""
+    size: int = checked_property(validators=(_non_negative,))
+    total: int = checked_property(
+        validators=(_non_negative, _bigger_than_progress),
+    )
+    progress: int = checked_property(
+        default=0,
+        validators=(_lower_than_total,)
+    )
+    characters: str = checked_property(
+        default=' ⠁⠃⠇⡇⣇⣧⣷⣿',
+        validators=(_more_than_two_characters,)
+    )
+
+
+@dataclass
 class LogicalProgressBar:
     r"""A text-based progress bar.
 
@@ -78,21 +95,14 @@ class LogicalProgressBar:
                     between represents the progression of the leading
                     character, from left to right.
     """
-    size: int = checked_property(validators=(_non_negative,))
-    total: int = checked_property(
-        validators=(_non_negative, _bigger_than_progress),
-    )
-    progress: int = checked_property(
-        default=0,
-        validators=(_lower_than_total,)
-    )
-    characters: str = checked_property(
-        default=' ⠁⠃⠇⡇⣇⣧⣷⣿',
-        validators=(_more_than_two_characters,)
-    )
-
+    bar_info: BarInfo
     _steps: int = field(init=False, repr=False)
     _resolution: int = field(init=False, repr=False)
+
+    size: int = wrapper(lambda self: self.bar_info)
+    total: int = wrapper(lambda self: self.bar_info)
+    progress: int = wrapper(lambda self: self.bar_info)
+    characters: str = wrapper(lambda self: self.bar_info)
 
     def _steps_and_resolution(self):
         steps = len(self.characters) - 1
@@ -139,4 +149,7 @@ class LogicalProgressBar:
         return bar
 
 
-__all__ = ['LogicalProgressBar']
+__all__ = [
+    'BarInfo',
+    'LogicalProgressBar',
+]
