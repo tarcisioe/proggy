@@ -7,7 +7,6 @@ from .position import *
 from .tty_multi_progress_bar import *
 from .tty_progress_bar import *
 
-
 __all__ = [
     *console.__all__,  # type: ignore
     *position.__all__,  # type: ignore

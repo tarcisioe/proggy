@@ -1,17 +1,16 @@
 """Console and cursor control."""
 from contextlib import contextmanager
 from sys import stdin
-from termios import tcgetattr, tcsetattr, TCSANOW
+from termios import TCSANOW, tcgetattr, tcsetattr
 from tty import setcbreak
 from typing import Optional
 
-
-from .position import Position
 from .ansi import (
-    read_ansi_response,
     device_status_report_escape,
+    read_ansi_response,
     set_cursor_position_escape,
 )
+from .position import Position
 
 
 @contextmanager

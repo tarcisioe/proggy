@@ -1,12 +1,10 @@
 """TTY-drawable base class."""
 from dataclasses import dataclass, field
-from typing import cast, Generic, Optional, TypeVar
-
-from .position import Position
-from .error import TTYDrawableNotStartedError
+from typing import Generic, Optional, TypeVar, cast
 
 from .console import get_cursor_position, reserve_space
-
+from .error import TTYDrawableNotStartedError
+from .position import Position
 
 T = TypeVar('T')
 

@@ -1,15 +1,14 @@
 """TTY-rendering enabled multi progress bar."""
 from __future__ import annotations
-from dataclasses import dataclass, field, InitVar
+
+from dataclasses import InitVar, dataclass, field
 from typing import List, Optional, Tuple
 
-from ..progress import LogicalProgressBar, BarInfo
-
+from ..progress import BarInfo, LogicalProgressBar
+from .console import at_position
 from .drawing_mixin import DrawingWrapperMixin
 from .position import Position
 from .tty_drawable import TTYDrawableMixin
-
-from .console import at_position
 
 
 @dataclass

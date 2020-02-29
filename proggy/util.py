@@ -1,6 +1,5 @@
 """Utility types and functions."""
-from typing import Any, Callable, Sequence, TypeVar, Optional
-
+from typing import Any, Callable, Optional, Sequence, TypeVar
 
 T = TypeVar('T')
 Validator = Callable[[Optional[str], Any, T], bool]

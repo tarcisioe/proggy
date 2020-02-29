@@ -1,7 +1,7 @@
 """TTY-rendering enabled progress bar."""
-from dataclasses import dataclass, InitVar, field
-from ..progress import LogicalProgressBar, BarInfo
+from dataclasses import InitVar, dataclass, field
 
+from ..progress import BarInfo, LogicalProgressBar
 from .console import at_position
 from .drawing_mixin import DrawingWrapperMixin
 from .tty_drawable import TTYDrawableMixin
