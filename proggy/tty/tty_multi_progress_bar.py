@@ -7,15 +7,14 @@ from ..progress import LogicalProgressBar
 from ..util import wrapper
 
 from .position import Position
-from .tty_drawable import TTYDrawable
+from .tty_drawable import TTYDrawableMixin
 
 from .console import at_position
 
 
 @dataclass
-class _TTYMultiProgressBarData:
-    """Mypy doesn't like abstract dataclasses yet."""
-    position: Optional[Position] = None
+class _TTYMultiProgressBarData(TTYDrawableMixin['TTYMultiProgressBar']):
+    """Mypy crashes if this is part of TTYMultiProgressBar yet."""
     bars: InitVar[Optional[List[LogicalProgressBar]]] = None
 
     _bars: List[Tuple[Position, LogicalProgressBar]] = field(
@@ -39,18 +38,22 @@ class MultiProgressBarProxy:
     parent: TTYMultiProgressBar
 
     size: int = wrapper(lambda self: self.bar)
-    progress: int = wrapper(lambda self: self.bar)
     total: int = wrapper(lambda self: self.bar)
     characters: str = wrapper(lambda self: self.bar)
 
-    def draw(self):
-        """Draw the parent TTYMultiProgressBar."""
+    @property
+    def progress(self) -> int:
+        """Wrap inner bar progress by drawing when it is set."""
+        return self.bar.progress
+
+    @progress.setter
+    def progress(self, value: int):
+        self.bar.progress = value
         self.parent.draw()
 
 
-class TTYMultiProgressBar(  # pylint: disable=abstract-method
+class TTYMultiProgressBar(
     _TTYMultiProgressBarData,
-    TTYDrawable
 ):
     """Progress bar capable of "drawing" itself to an ANSI-escape enabled TTY.
 

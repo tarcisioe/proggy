@@ -1,22 +1,15 @@
 """TTY-rendering enabled progress bar."""
 from dataclasses import dataclass
-from typing import Optional
-
 from ..progress import LogicalProgressBar
 
 from .console import at_position
-from .position import Position
-from .tty_drawable import TTYDrawable
+from .tty_drawable import TTYDrawableMixin
 
 
 @dataclass
-class _TTYProgressBarData(LogicalProgressBar):
-    position: Optional[Position] = None
-
-
-class TTYProgressBar(  # pylint: disable=abstract-method
-    _TTYProgressBarData,
-    TTYDrawable
+class TTYProgressBar(
+    LogicalProgressBar,
+    TTYDrawableMixin['TTYProgressBar'],
 ):
     """Progress bar capable of "drawing" itself to an ANSI-escape enabled TTY.
 

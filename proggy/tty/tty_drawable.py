@@ -1,7 +1,6 @@
 """TTY-drawable base class."""
-from abc import ABC, abstractmethod, abstractproperty
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import cast, Generic, Optional, TypeVar
 
 from .position import Position
 from .error import TTYDrawableNotStartedError
@@ -9,28 +8,18 @@ from .error import TTYDrawableNotStartedError
 from .console import get_cursor_position, reserve_space
 
 
+T = TypeVar('T')
+
+
 @dataclass
-class _TTYDrawableData:
-    """Mypy doesn't like abstract dataclasses yet."""
-    _started: bool = field(default=False, init=False)
-
-
-class TTYDrawable(ABC, _TTYDrawableData):
+class TTYDrawableMixin(Generic[T]):
     """Abstract TTY-drawable context manager.
 
     Child classes should provide their own height and method of drawing.
     """
-    @abstractproperty
-    def position(self) -> Optional[Position]:
-        """The object's position."""
-
-    @abstractproperty
-    def _height(self) -> int:
-        ...
-
-    @abstractmethod
-    def _draw(self) -> None:
-        """Draw to the TTY."""
+    position: Optional[Position] = None
+    _started: bool = field(default=False, init=False)
+    _height: int = field(init=False)
 
     def draw(self) -> None:
         """Draw to the TTY."""
@@ -40,9 +29,9 @@ class TTYDrawable(ABC, _TTYDrawableData):
                 'context managers.'
             )
 
-        self._draw()
+        self._draw()  # type: ignore
 
-    def __enter__(self):
+    def __enter__(self) -> T:
         self._started = True
 
         if self.position is None:
@@ -54,11 +43,11 @@ class TTYDrawable(ABC, _TTYDrawableData):
         )
 
         self.draw()
-        return self
+        return cast(T, self)
 
     def __exit__(self, exc_type, exc, exc_tb):
         print()
         self._started = False
 
 
-__all__ = ['TTYDrawable']
+__all__ = ['TTYDrawableMixin']
