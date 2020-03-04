@@ -1,6 +1,6 @@
 """Mixin for objects that wrap a progress bar and draw a drawable."""
 from dataclasses import dataclass
-from typing import Protocol
+from typing_extensions import Protocol
 
 from ..types import ProgressBar
 from ..util import wrapper
