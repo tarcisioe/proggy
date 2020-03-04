@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "proggy"
-version = "0.4.2"
+version = "0.4.3"
 description = "A progress bar generator."
 authors = ["Tarcísio Eduardo Moreira Crocomo <tarcisioe@pm.me>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 typing_extensions = "^3.7.4"
 
 [tool.poetry.dev-dependencies]
